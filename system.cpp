@@ -47,7 +47,7 @@ void addBook() {
 	cin.ignore();  // Add this line
 
 	ofstream booksfile("Books.txt", ios::app);
-	booksfile << newBook.title << " " << newBook.author << " " << newBook.year << endl;
+	booksfile << newBook.title << " | " << newBook.author << " | " << newBook.year << endl;
 	booksfile.close();
 
 	cout << "Book added successfully!" << endl;
@@ -64,9 +64,14 @@ void viewBooks() {
 		while (getline(booksfile, line)) {
 			stringstream ss(line);
 			Book currentBook;
-			getline(ss, currentBook.title, ' ');
-			getline(ss, currentBook.author, ' ');
+			getline(ss, currentBook.title, '|');
+			getline(ss, currentBook.author, '|');
 			ss >> currentBook.year;
+			// Trim leading and trailing spaces
+			currentBook.title = currentBook.title.substr(currentBook.title.find_first_not_of(' '));
+			currentBook.title = currentBook.title.substr(0, currentBook.title.find_last_not_of(' ') + 1);
+			currentBook.author = currentBook.author.substr(currentBook.author.find_first_not_of(' '));
+			currentBook.author = currentBook.author.substr(0, currentBook.author.find_last_not_of(' ') + 1);
 			cout << "Title: " << currentBook.title << ", Author: " << currentBook.author << ", Year: " << currentBook.year << endl;
 		}
 		booksfile.close();
@@ -84,7 +89,8 @@ void viewBooks() {
 		else if (choice == 2) {
 			string title;
 			cout << "Enter the title of the book to modify: ";
-			cin >> title;
+			cin.ignore();
+			getline(cin, title);
 			modifyBook(title);
 			cout << "Book modified successfully.\n";
 		}
