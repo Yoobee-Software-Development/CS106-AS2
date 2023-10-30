@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <map>
 #include <stdlib.h>
@@ -18,6 +19,7 @@ struct User {
 
 // Define Functions
 void loginuser();
+void modifyBook(string title);
 void adminmenu(string username);
 void viewaccounts();
 void usermenu(string username);
@@ -25,6 +27,98 @@ void createuser();
 void exitprogram();
 int main();
 
+// Structure to store book information.
+struct Book {
+	string title;
+	string author;
+	int year;
+};
+
+// Function to add a book.
+void addBook() {
+	Book newBook;
+	cin.ignore();  // To clear the newline character in the buffer
+	cout << "Enter book title: ";
+	getline(cin, newBook.title);
+	cout << "Enter book author: ";
+	getline(cin, newBook.author);
+	cout << "Enter book year: ";
+	cin >> newBook.year;
+	cin.ignore();  // Add this line
+
+	ofstream booksfile("Books.txt", ios::app);
+	booksfile << newBook.title << " " << newBook.author << " " << newBook.year << endl;
+	booksfile.close();
+
+	cout << "Book added successfully!" << endl;
+}
+
+// Function to view the books.
+void viewBooks() {
+	int choice;
+	do {
+		system("clear"); // Clear Screen
+		cout << "Books:\n";
+		string line;
+		ifstream booksfile("Books.txt");
+		while (getline(booksfile, line)) {
+			stringstream ss(line);
+			Book currentBook;
+			getline(ss, currentBook.title, ' ');
+			getline(ss, currentBook.author, ' ');
+			ss >> currentBook.year;
+			cout << "Title: " << currentBook.title << ", Author: " << currentBook.author << ", Year: " << currentBook.year << endl;
+		}
+		booksfile.close();
+
+		cout << "\n1. Add Book" << endl;
+		cout << "2. Modify Book" << endl;
+		cout << "3. Return to Admin Menu" << endl;
+		cout << "Enter your choice: ";
+		cin >> choice;
+
+		if (choice == 1) {
+			addBook();
+			cout << "Book added successfully.\n";
+		}
+		else if (choice == 2) {
+			string title;
+			cout << "Enter the title of the book to modify: ";
+			cin >> title;
+			modifyBook(title);
+			cout << "Book modified successfully.\n";
+		}
+	} while (choice != 3);
+
+	system("clear"); //Clear Screen
+}
+
+
+// Function to modify a book.
+void modifyBook(string title) {
+	vector<Book> books;
+	Book currentBook;
+	ifstream booksfile("Books.txt");
+	while (booksfile >> currentBook.title >> currentBook.author >> currentBook.year) {
+		if (currentBook.title != title) {
+			books.push_back(currentBook);
+		}
+		else {
+			cout << "Enter new author: ";
+			cin >> currentBook.author;
+			cout << "Enter new year: ";
+			cin >> currentBook.year;
+			books.push_back(currentBook);
+		}
+	}
+	booksfile.close();
+
+	ofstream booksfileout("Books.txt");
+	for (const auto& book : books) {
+		booksfileout << book.title << " " << book.author << " " << book.year << endl;
+	}
+	booksfileout.close();
+}
 
 void createuser() {
 
@@ -156,21 +250,24 @@ void loginuser() {   // Login User
 // Admin Menu
 void adminmenu(string username)
 {
-
 	system("clear"); // clear screen
 	int choice;
 	do {
 		cout << "Admin Menu:" << endl;
-		cout << "1. Logout" << endl;
-		cout << "2. Exit" << endl;
+		cout << "1. View Books" << endl;
+		cout << "2. Logout" << endl;
+		cout << "3. Exit" << endl;
 		cout << "Enter your choice: ";
 		cin >> choice;
 
 		switch (choice) {
 		case 1:
-			main();
+			viewBooks();
 			break;
 		case 2:
+			main();
+			break;
+		case 3:
 			exitprogram();
 			break;
 		default:
@@ -230,4 +327,3 @@ int main()
 	}
 	return 0;
 };
-
